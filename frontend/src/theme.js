@@ -37,10 +37,14 @@ export function initTheme() {
   };
 
   const cycleTheme = () => {
-    const index = THEME_STEPS.indexOf(mode);
-    mode = THEME_STEPS[(index + 1) % THEME_STEPS.length];
-    localStorage.setItem(THEME_KEY, mode);
-    updateUI();
+    icon.classList.add('animating');
+    setTimeout(() => {
+      const index = THEME_STEPS.indexOf(mode);
+      mode = THEME_STEPS[(index + 1) % THEME_STEPS.length];
+      localStorage.setItem(THEME_KEY, mode);
+      updateUI();
+      icon.classList.remove('animating');
+    }, 150);
   };
 
   button.addEventListener('click', cycleTheme);
