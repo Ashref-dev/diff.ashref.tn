@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ .Title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>diff.ashref.tn</h1>
+      <p>Paste two strings and get a GitHub-style diff.</p>
+    </header>
+
+    <form method="post" action="/" class="panel">
+      <div class="input-grid">
+        <div class="input-group">
+          <label for="original">Original</label>
+          <textarea id="original" name="original" placeholder="Original text...">{{ .Original }}</textarea>
+        </div>
+        <div class="input-group">
+          <label for="modified">Modified</label>
+          <textarea id="modified" name="modified" placeholder="Modified text...">{{ .Modified }}</textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit">Compare</button>
+      </div>
+    </form>
+
+    {{ if .Error }}
+    <section class="panel error" aria-live="polite">{{ .Error }}</section>
+    {{ end }}
+
+    {{ if .HasResult }}
+    <section class="panel diff" aria-label="Diff output">
+      {{ if .DiffLines }}
+      <div class="diff-head">
+        <span>Old</span>
+        <span>New</span>
+        <span>Line</span>
+      </div>
+      {{ range .DiffLines }}
+      <div class="diff-row {{ .Kind }}">
+        <div class="ln">{{ if gt .OldLine 0 }}{{ .OldLine }}{{ end }}</div>
+        <div class="ln">{{ if gt .NewLine 0 }}{{ .NewLine }}{{ end }}</div>
+        <pre><span class="marker">{{ .Marker }}</span>{{ .Text }}</pre>
+      </div>
+      {{ end }}
+      {{ else }}
+      <div class="empty">No differences.</div>
+      {{ end }}
+    </section>
+    {{ end }}
+  </main>
+</body>
+</html>
