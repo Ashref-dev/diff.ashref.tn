@@ -1,16 +1,15 @@
-# Binary output
 diff-server
 *.exe
 
-# Build artifacts
 dist/
+api/static/
 
-# Editor
+frontend/node_modules/
+
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS
 .DS_Store
 Thumbs.db

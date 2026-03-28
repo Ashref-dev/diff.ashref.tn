@@ -1,13 +1,27 @@
 # diff.ashref.tn
 
-A minimal, fast text diff tool. Paste two strings and get a GitHub-style line-by-line diff. Deployed at [diff.ashref.tn](https://diff.ashref.tn).
+A real-time text diff tool with split view, syntax highlighting, and live comparison. Deployed at [diff.ashref.tn](https://diff.ashref.tn).
 
 ## Stack
 
-- **Language**: Go 1.23, stdlib only (`net/http`, `html/template`, `embed`)
-- **Frontend**: Server-side rendered HTML + vanilla CSS (no JS framework, no build step)
-- **Assets**: Embedded in binary via `go:embed` — single self-contained binary
-- **Deploy**: Docker (single container, ~15MB image)
+- **Frontend**: Vanilla JS + CSS, built with Vite, using [jsdiff](https://github.com/kpdecker/jsdiff) for diffing and [highlight.js](https://highlightjs.org/) for syntax highlighting
+- **Backend**: Go 1.23, stdlib only — serves the SPA via `embed`
+- **Deploy**: Docker (multi-stage: Node build -> Go build -> Alpine runtime)
+
+## Features
+
+- Real-time diff as you type (debounced 150ms, no submit button)
+- Split view with aligned line-by-line comparison
+- Line / Word / Character diff precision
+- Syntax highlighting for 18+ languages
+- Case sensitivity toggle
+- Whitespace trimming
+- Text transform (lowercase / uppercase)
+- Line wrap toggle
+- Dark / Light / System theme with persistence
+- Keyboard shortcut: Cmd/Ctrl+Enter to swap texts
+- Responsive layout (mobile-friendly)
+- Stats bar showing additions, deletions, unchanged counts
 
 ## Quick Start
 
@@ -17,22 +31,22 @@ docker compose up --build
 
 Access at: http://localhost:3005
 
-## Manual (Dev)
+## Development
 
+**Frontend:**
 ```bash
+cd frontend
+npm install
+npm run dev
+```
+
+**Go server (after frontend build):**
+```bash
+cd frontend && npm run build && cd ..
 go run .
 ```
 
 Access at: http://localhost:8080
-
-## Features
-
-- Line-by-line diff with LCS algorithm (no external deps)
-- GitHub-style add/remove highlighting
-- Line number gutters
-- Dark/light mode toggle with localStorage persistence
-- 1MB input size limit with graceful error handling
-- Fully responsive (mobile + desktop)
 
 ## Tests
 
@@ -44,8 +58,7 @@ go test ./...
 
 1. Clone to VPS
 2. `docker compose up -d --build`
-3. Add to Cloudflare tunnel: `diff.ashref.tn → http://127.0.0.1:3005`
-4. Reload cloudflared: `sudo systemctl reload cloudflared`
+3. Cloudflare tunnel routes `diff.ashref.tn` to the container
 
 ## License
 
