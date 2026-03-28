@@ -4,6 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>diff.ashref.tn</title>
+    <meta
+      name="description"
+      content="Compare text instantly with a real-time split-view diff tool. Line, word, and character-level comparison with syntax highlighting."
+    />
+    <meta name="theme-color" content="#070a14" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f7f9ff" media="(prefers-color-scheme: light)" />
+    <meta property="og:title" content="diff.ashref.tn — Compare text, instantly." />
+    <meta
+      property="og:description"
+      content="Real-time split-view text diff with syntax highlighting. No clicks needed."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://diff.ashref.tn" />
+    <meta property="og:image" content="https://diff.ashref.tn/favicon.svg" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="diff.ashref.tn" />
+    <meta
+      name="twitter:description"
+      content="Real-time split-view text diff with syntax highlighting."
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link
       rel="preconnect"
@@ -66,12 +86,23 @@
           <span class="stat stat-add" id="statAdd">0 additions</span>
           <span class="stat stat-remove" id="statRemove">0 deletions</span>
           <span class="stat stat-context" id="statContext">0 unchanged</span>
+          <button class="clear-btn" id="clearBtn" type="button">Clear</button>
+          <span class="shortcut-hint">⌘ Enter to swap</span>
         </div>
 
         <div class="workspace-layout">
           <aside class="sidebar" id="sidebar">
             <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" type="button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+                focusable="false"
+              >
                 <path d="M15 18l-6-6 6-6" />
               </svg>
             </button>

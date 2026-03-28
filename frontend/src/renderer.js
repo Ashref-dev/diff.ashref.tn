@@ -2,6 +2,15 @@ import { highlightCode } from './highlight-wrapper.js';
 
 let displaySyncBound = false;
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 function lineClass(type) {
   if (type === 'add') {
     return 'line-add';
@@ -16,9 +25,22 @@ function lineClass(type) {
 }
 
 function renderPanel(lines, syntaxLang) {
+  const texts = lines.map((line) => line.text);
+  let highlighted;
+  if (syntaxLang) {
+    const fullText = texts.join('\n');
+    const fullHighlighted = highlightCode(fullText, syntaxLang);
+    highlighted = fullHighlighted.split('\n');
+  }
+
   return lines
-    .map((line) => {
-      const content = line.type === 'blank' && line.text.length === 0 ? '&nbsp;' : highlightCode(line.text, syntaxLang);
+    .map((line, i) => {
+      const content =
+        line.type === 'blank' && line.text.length === 0
+          ? '&nbsp;'
+          : syntaxLang && highlighted
+            ? highlighted[i] || escapeHtml(line.text)
+            : escapeHtml(line.text);
       const no = line.lineNum == null ? '' : String(line.lineNum);
       return `<div class="diff-line ${lineClass(line.type)}"><span class="line-no">${no}</span><span class="line-content">${content}</span></div>`;
     })

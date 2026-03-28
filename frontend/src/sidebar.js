@@ -10,6 +10,7 @@ function parseStored() {
 
 export function initSidebar(onChange) {
   const sidebar = document.getElementById('sidebar');
+  const workspaceLayout = sidebar.closest('.workspace-layout');
   const toggleBtn = document.getElementById('sidebarToggle');
   const diffPrecision = document.getElementById('diffPrecision');
   const textTransform = document.getElementById('textTransform');
@@ -75,6 +76,9 @@ export function initSidebar(onChange) {
   }
   if (stored.collapsed) {
     sidebar.classList.add('collapsed');
+    if (workspaceLayout) {
+      workspaceLayout.classList.add('sidebar-collapsed');
+    }
   }
 
   const activateSegmented = (container, target) => {
@@ -98,6 +102,9 @@ export function initSidebar(onChange) {
       sidebar.classList.toggle('mobile-open');
     } else {
       sidebar.classList.toggle('collapsed');
+      if (workspaceLayout) {
+        workspaceLayout.classList.toggle('sidebar-collapsed', sidebar.classList.contains('collapsed'));
+      }
     }
     save();
   };

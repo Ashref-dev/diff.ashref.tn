@@ -10,6 +10,7 @@ const modifiedDisplay = document.getElementById('modifiedDisplay');
 const statAdd = document.getElementById('statAdd');
 const statRemove = document.getElementById('statRemove');
 const statContext = document.getElementById('statContext');
+const clearBtn = document.getElementById('clearBtn');
 const originalLineCount = document.getElementById('originalLineCount');
 const modifiedLineCount = document.getElementById('modifiedLineCount');
 const header = document.getElementById('siteHeader');
@@ -33,6 +34,11 @@ function runDiff() {
   const result = computeDiff(originalInput.value, modifiedInput.value, options);
   renderDiff(result, originalDisplay, modifiedDisplay, options);
 
+   if (!originalInput.value && !modifiedInput.value) {
+    originalDisplay.innerHTML = '<div class="empty-state">Paste or type text here</div>';
+    modifiedDisplay.innerHTML = '<div class="empty-state">Paste or type text here</div>';
+  }
+
   statAdd.textContent = `${result.additions} additions`;
   statRemove.textContent = `${result.deletions} deletions`;
   statContext.textContent = `${result.unchanged} unchanged`;
@@ -48,7 +54,9 @@ function runDiff() {
 
 function debouncedDiff() {
   clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(runDiff, 150);
+  debounceTimer = setTimeout(() => {
+    requestAnimationFrame(runDiff);
+  }, 250);
 }
 
 function syncPanelScroll(input, display) {
@@ -88,6 +96,12 @@ function init() {
 
   [originalInput, modifiedInput].forEach((input) => {
     input.addEventListener('input', debouncedDiff);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    originalInput.value = '';
+    modifiedInput.value = '';
+    runDiff();
   });
 
   syncPanelScroll(originalInput, originalDisplay);

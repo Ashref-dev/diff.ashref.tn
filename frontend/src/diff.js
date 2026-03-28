@@ -116,32 +116,20 @@ function toAlignedLines(parts) {
   };
 
   const writeText = (text, side, changed) => {
-    if (!text) {
-      return;
-    }
-    for (let i = 0; i < text.length; i += 1) {
-      const char = text[i];
+    if (!text) return;
+    let pos = 0;
+    while (pos < text.length) {
+      const nlIdx = text.indexOf('\n', pos);
+      const chunk = nlIdx === -1 ? text.slice(pos) : text.slice(pos, nlIdx);
 
-      if (side === 'original') {
-        currentOriginal += char;
-      } else if (side === 'modified') {
-        currentModified += char;
-      } else {
-        currentOriginal += char;
-        currentModified += char;
-      }
+      if (side === 'original' || side === 'both') currentOriginal += chunk;
+      if (side === 'modified' || side === 'both') currentModified += chunk;
+      if (changed === 'original') originalChanged = true;
+      else if (changed === 'modified') modifiedChanged = true;
 
-      if (changed === 'original') {
-        originalChanged = true;
-      } else if (changed === 'modified') {
-        modifiedChanged = true;
-      }
-
-      if (char === '\n') {
-        currentOriginal = currentOriginal.slice(0, -1);
-        currentModified = currentModified.slice(0, -1);
-        pushLine();
-      }
+      if (nlIdx === -1) break;
+      pushLine();
+      pos = nlIdx + 1;
     }
   };
 
