@@ -271,17 +271,11 @@ a {
 }
 
 .workspace {
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  border: 1px solid var(--border-soft);
+  border-top: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-soft);
   background: color-mix(in srgb, var(--surface-soft) 92%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-radius: 0;
   box-shadow: var(--shadow-lift);
   overflow: hidden;
 }
@@ -406,9 +400,18 @@ a {
 }
 
 .control-group {
-  display: grid;
-  gap: 0.55rem;
-  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+}
+
+.control-group:has(.segmented),
+.control-group:has(.select-input) {
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .control-label {
@@ -449,8 +452,8 @@ a {
   position: relative;
   width: 44px;
   height: 24px;
-  min-height: 32px;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .toggle input {
@@ -567,6 +570,7 @@ a {
   color: transparent;
   caret-color: var(--violet-300);
   overflow: auto;
+  padding: 0.65rem calc(0.4rem + 52px + 0.92rem) 0.65rem calc(0.4rem + 52px + 0.92rem);
 }
 
 .editor-input::placeholder {
@@ -606,14 +610,6 @@ a {
 
 .line-blank {
   opacity: 0.38;
-}
-
-.empty-state {
-  padding: 2rem 1.5rem;
-  color: var(--text-muted);
-  font-family: var(--font-sans);
-  font-size: 0.95rem;
-  opacity: 0.6;
 }
 
 .hljs-keyword,

@@ -34,11 +34,6 @@ function runDiff() {
   const result = computeDiff(originalInput.value, modifiedInput.value, options);
   renderDiff(result, originalDisplay, modifiedDisplay, options);
 
-   if (!originalInput.value && !modifiedInput.value) {
-    originalDisplay.innerHTML = '<div class="empty-state">Paste or type text here</div>';
-    modifiedDisplay.innerHTML = '<div class="empty-state">Paste or type text here</div>';
-  }
-
   statAdd.textContent = `${result.additions} additions`;
   statRemove.textContent = `${result.deletions} deletions`;
   statContext.textContent = `${result.unchanged} unchanged`;
