@@ -1,0 +1,149 @@
+/*
+ * Carved surfaces (DESIGN.md §5). A surface is one sheet: a body plus up to two tabs that rise out of its
+ * top edge, joined by concave fillets. The sheet is painted by a separate, content-free layer so its
+ * outline and shadow (filters on the union of the pieces) are rasterised once and never repainted
+ * while the content inside scrolls or re-renders.
+ *
+ * Seams: every piece uses the same opaque fill and overlaps its neighbour by 1px, so anti-aliasing never
+ * exposes the page between them. The outline is derived from the union's alpha, so it is continuous
+ * across tab, fillet and body at any DPR.
+ */
+
+@property --edge {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --glow {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+.surface {
+  --tab-h: 34px;
+  --r-tab: 11px;
+  --r-fillet: 10px;
+  --r-body: 16px;
+  --tab-s: 0px;
+  --tab-e: 0px;
+  --edge: var(--edge-rest);
+  --glow: transparent;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition:
+    --edge 0.2s ease,
+    --glow 0.2s ease;
+}
+
+.surface:has([data-rim]:focus-visible) {
+  --edge: var(--accent);
+  --glow: var(--accent-soft);
+}
+
+.surface-shape {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  filter: drop-shadow(1px 0 0 var(--edge)) drop-shadow(-1px 0 0 var(--edge)) drop-shadow(0 1px 0 var(--edge))
+    drop-shadow(0 -1px 0 var(--edge)) drop-shadow(0 0 5px var(--glow)) drop-shadow(0 1px 1.5px var(--lift-near))
+    drop-shadow(0 6px 14px var(--lift-far));
+  will-change: filter;
+}
+
+.surface-shape > i {
+  position: absolute;
+  background: var(--card);
+}
+
+.shape-body {
+  inset: var(--tab-h) 0 0;
+  border-radius: var(--r-body);
+}
+
+.surface[data-start] .shape-body {
+  border-top-left-radius: 0;
+}
+
+.surface[data-end] .shape-body {
+  border-top-right-radius: 0;
+}
+
+.shape-tab {
+  top: 0;
+  height: calc(var(--tab-h) + 1px);
+  border-radius: var(--r-tab) var(--r-tab) 0 0;
+}
+
+.shape-tab[data-at="start"] {
+  left: 0;
+  width: var(--tab-s);
+}
+
+.shape-tab[data-at="end"] {
+  right: 0;
+  width: var(--tab-e);
+}
+
+/* Concave fillet: a square filled everywhere except a quarter disc centred on its outer corner. */
+.shape-fillet {
+  top: calc(var(--tab-h) - var(--r-fillet));
+  width: calc(var(--r-fillet) + 1px);
+  height: calc(var(--r-fillet) + 1px);
+  --hole: transparent calc(var(--r-fillet) - 0.5px), var(--card) calc(var(--r-fillet) + 0.5px);
+}
+
+.shape-fillet[data-at="start"] {
+  left: calc(var(--tab-s) - 1px);
+  background: radial-gradient(circle at 100% 0, var(--hole));
+}
+
+.shape-fillet[data-at="end"] {
+  right: calc(var(--tab-e) - 1px);
+  background: radial-gradient(circle at 0 0, var(--hole));
+}
+
+/* Until a tab is measured its pieces stay hidden, so the first paint is a plain rounded sheet. */
+.surface:not([data-start]) [data-at="start"],
+.surface:not([data-end]) [data-at="end"] {
+  display: none;
+}
+
+.surface-tabs {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  height: var(--tab-h);
+  min-width: 0;
+}
+
+.surface-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  min-width: 0;
+  padding-inline: 14px;
+  white-space: nowrap;
+}
+
+.surface-body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 0 0 var(--r-body) var(--r-body);
+}
+
+.surface:not([data-end]) .surface-body {
+  border-top-right-radius: var(--r-body);
+}
+
+.surface-body :where([data-rim]):focus-visible {
+  outline: none;
+}

@@ -1,0 +1,174 @@
+/* Code surfaces: editors and diff rows share one metric so line numbers line up everywhere (DESIGN.md §3). */
+:root {
+  --code-size: 12.75px;
+  --code-line: 20px;
+  --code-pad-y: 12px;
+}
+
+/* ── Editors ───────────────────────────────────────────────────────── */
+.editor-text,
+.editor-gutter {
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+  line-height: var(--code-line);
+  font-variant-ligatures: none;
+  tab-size: 4;
+}
+
+.editor-text {
+  padding: var(--code-pad-y) 16px var(--code-pad-y) 12px;
+  white-space: pre;
+  overflow-wrap: normal;
+  resize: none;
+  background: transparent;
+  color: var(--ink);
+}
+
+.editor-text::placeholder {
+  color: var(--faint);
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.editor-gutter {
+  padding-block: var(--code-pad-y);
+  color: var(--faint);
+  text-align: right;
+  white-space: pre;
+  font-variant-numeric: tabular-nums;
+  will-change: transform;
+}
+
+/* ── Diff rows ─────────────────────────────────────────────────────── */
+.diff {
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+  line-height: var(--code-line);
+  font-variant-ligatures: none;
+  tab-size: 4;
+}
+
+.diff-row {
+  display: grid;
+  min-height: var(--code-line);
+}
+
+.diff-row[data-view="split"] {
+  grid-template-columns: var(--gutter) minmax(var(--old-w), 1fr) var(--gutter) minmax(var(--new-w), 1fr);
+}
+
+.diff-row[data-view="unified"] {
+  grid-template-columns: var(--gutter) var(--gutter) minmax(var(--new-w), 1fr);
+}
+
+.diff-row[data-view="split"] > :nth-child(3) {
+  box-shadow: inset 1px 0 0 var(--line);
+}
+
+.ln {
+  padding: 0 10px 0 6px;
+  color: var(--faint);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.code {
+  position: relative;
+  min-width: 0;
+  padding: 0 16px 0 24px;
+  white-space: pre;
+}
+
+.diff[data-wrap="true"] .code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.code::before {
+  content: attr(data-sign);
+  position: absolute;
+  left: 9px;
+  user-select: none;
+}
+
+.is-add {
+  background: var(--add-row);
+}
+
+.is-del {
+  background: var(--del-row);
+}
+
+.ln.is-add {
+  background: var(--add-gutter);
+  color: var(--add-ink);
+}
+
+.ln.is-del {
+  background: var(--del-gutter);
+  color: var(--del-ink);
+}
+
+.code.is-add::before {
+  color: var(--add-ink);
+}
+
+.code.is-del::before {
+  color: var(--del-ink);
+}
+
+.is-void {
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 5px, var(--line) 5px 6px),
+    var(--sunken);
+}
+
+.mark {
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.is-add .mark {
+  background: var(--add-mark);
+}
+
+.is-del .mark {
+  background: var(--del-mark);
+}
+
+/* ── Collapsed context separator ───────────────────────────────────── */
+.gap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--sunken);
+  box-shadow:
+    inset 0 1px 0 var(--line),
+    inset 0 -1px 0 var(--line);
+  color: var(--muted);
+  font: 500 12px/1 var(--font-sans);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.gap-label {
+  position: sticky;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gap:hover {
+  background: color-mix(in oklab, var(--sunken), var(--accent) 7%);
+  color: var(--accent-ink);
+}
+
+.gap:focus-visible {
+  outline-offset: -2px;
+}

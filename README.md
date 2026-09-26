@@ -1,65 +1,39 @@
-# diff.ashref.tn
+# diff.achraf.tn
 
-A real-time text diff tool with split view, syntax highlighting, and live comparison. Deployed at [diff.ashref.tn](https://diff.ashref.tn).
+A fast, private text diff. Paste two texts, see every change as you type — split or unified, word/char
+highlights, optional syntax colors. Everything runs in the browser; nothing is uploaded.
+
+Live at [diff.achraf.tn](https://diff.achraf.tn).
 
 ## Stack
 
-- **Frontend**: Vanilla JS + CSS, built with Vite, using [jsdiff](https://github.com/kpdecker/jsdiff) for diffing and [highlight.js](https://highlightjs.org/) for syntax highlighting
-- **Backend**: Go 1.23, stdlib only — serves the SPA via `embed`
-- **Deploy**: Docker (multi-stage: Node build -> Go build -> Alpine runtime)
+- Bun (package manager / scripts), Vite 8 + React 19 (React Compiler) + TypeScript 7, Tailwind CSS 4
+- [jsdiff](https://github.com/kpdecker/jsdiff) in a module Web Worker (`src/diff.worker.ts`)
+- [@tanstack/react-virtual](https://tanstack.com/virtual) for the diff rows
+- [Shiki](https://shiki.style) (JS regex engine, lazy per language, inside the worker) for syntax colors;
+  the default "Auto" language is sniffed in the worker with cheap heuristics (`src/lib/detect.ts`)
 
-## Features
+## How it stays fast
 
-- Real-time diff as you type (debounced 150ms, no submit button)
-- Split view with aligned line-by-line comparison
-- Line / Word / Character diff precision
-- Syntax highlighting for 18+ languages
-- Case sensitivity toggle
-- Whitespace trimming
-- Text transform (lowercase / uppercase)
-- Line wrap toggle
-- Dark / Light / System theme with persistence
-- Keyboard shortcut: Cmd/Ctrl+Enter to swap texts
-- Responsive layout (mobile-friendly)
-- Stats bar showing additions, deletions, unchanged counts
+- Textareas are uncontrolled; typing never waits on React or the diff.
+- One diff in flight at a time, latest input wins; results render in a transition.
+- Line diff on interned line ids, common prefix/suffix trimmed, lines unique to one side discarded before Myers.
+- Intra-line diffs are capped per line (2k chars, bounded edit length) and per comparison.
+- Only visible rows are in the DOM. Highlighting runs in chunks, after a short pause, and yields to newer diffs;
+  tokens come back as transferable typed arrays, so the main thread never deserializes per-line objects.
 
-## Quick Start
+## Develop
 
 ```bash
-docker compose up --build
+bun install
+bun run dev       # http://localhost:5173
+bun run build     # tsc --noEmit && vite build → dist/
+bun run preview   # serve dist/ locally
 ```
 
-Access at: http://localhost:3005
+## Deploy (Vercel)
 
-## Development
+Import the repo in Vercel; `vercel.json` sets the Vite framework preset, `bun install`, `bun run build`, output `dist/`,
+immutable caching for `/assets/*` and security headers. No server code, no environment variables.
 
-**Frontend:**
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-**Go server (after frontend build):**
-```bash
-cd frontend && npm run build && cd ..
-go run .
-```
-
-Access at: http://localhost:8080
-
-## Tests
-
-```bash
-go test ./...
-```
-
-## Production Deployment
-
-1. Clone to VPS
-2. `docker compose up -d --build`
-3. Cloudflare tunnel routes `diff.ashref.tn` to the container
-
-## License
-
-Private — all rights reserved.
+Design tokens and rules live in [DESIGN.md](DESIGN.md).
