@@ -22,6 +22,10 @@ Live at [diff.achraf.tn](https://diff.achraf.tn).
 - Only visible rows are in the DOM. Highlighting runs in chunks, after a short pause, and yields to newer diffs;
   tokens come back as transferable typed arrays, so the main thread never deserializes per-line objects.
 
+- No CSS filters or `will-change` on large surfaces; the splitter writes one height per frame to the editors row only.
+- `bun run perf` is a regression gate: CPU throttled 6x, GPU and software compositing, budgets of 100ms input→paint
+  and 50ms frame time for typing, dragging the splitter and scrolling (run `bun run build && bun run preview:perf` first).
+
 ## Develop
 
 ```bash
