@@ -8,40 +8,57 @@ const clamp = (value: number) => Math.min(MAX_SPLIT, Math.max(MIN_SPLIT, value))
 
 interface SplitterProps {
   readonly split: number;
-  /** The element whose `--split` custom property sizes the editors; updated directly while dragging. */
+  /** The element the split fraction is relative to; measured once per drag. */
   readonly containerRef: RefObject<HTMLElement | null>;
+  /** The editors row; its height is written directly, at most once per frame, while dragging. */
+  readonly targetRef: RefObject<HTMLElement | null>;
   readonly onCommit: (split: number) => void;
   readonly onCollapse: () => void;
 }
 
 /** Resize handle living in the diff surface's carved notch. Drag, arrow keys; double-click or Enter hides the inputs. */
-export function Splitter({ split, containerRef, onCommit, onCollapse }: SplitterProps) {
-  const fractionAt = (clientY: number): number | null => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    return rect && rect.height > 0 ? clamp((clientY - rect.top) / rect.height) : null;
-  };
-
+export function Splitter({ split, containerRef, targetRef, onCommit, onCollapse }: SplitterProps) {
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect || rect.height <= 0) return;
     event.preventDefault();
     const handle = event.currentTarget;
     handle.setPointerCapture(event.pointerId);
-    let latest = split;
-    const move = (e: globalThis.PointerEvent) => {
-      const next = fractionAt(e.clientY);
-      if (next === null) return;
-      latest = next;
-      containerRef.current?.style.setProperty("--split", String(next));
+    const { top, height } = rect;
+    let latestY: number | null = null;
+    let frame = 0;
+    const fraction = () => (latestY === null ? split : clamp((latestY - top) / height));
+    const apply = (value: number) => {
+      const target = targetRef.current;
+      if (target) target.style.height = `${value * 100}%`;
     };
-    const up = () => {
+    const move = (e: globalThis.PointerEvent) => {
+      latestY = e.clientY;
+      if (frame !== 0) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        if (handle.isConnected) apply(fraction());
+        else cancel();
+      });
+    };
+    const end = (commit: boolean) => {
+      cancelAnimationFrame(frame);
+      frame = 0;
       handle.removeEventListener("pointermove", move);
       handle.removeEventListener("pointerup", up);
-      handle.removeEventListener("pointercancel", up);
-      onCommit(latest);
+      handle.removeEventListener("pointercancel", cancel);
+      handle.removeEventListener("lostpointercapture", cancel);
+      const final = commit ? fraction() : split;
+      apply(final);
+      if (commit) onCommit(final);
     };
+    const up = () => end(true);
+    const cancel = () => end(false);
     handle.addEventListener("pointermove", move);
     handle.addEventListener("pointerup", up);
-    handle.addEventListener("pointercancel", up);
+    handle.addEventListener("pointercancel", cancel);
+    handle.addEventListener("lostpointercapture", cancel);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {

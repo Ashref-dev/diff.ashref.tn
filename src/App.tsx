@@ -45,6 +45,7 @@ export function App() {
   const originalRef = useRef<HTMLTextAreaElement>(null);
   const modifiedRef = useRef<HTMLTextAreaElement>(null);
   const mainRef = useRef<HTMLElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
   const [split, setSplit] = useState(readSplit);
   const [inputsHidden, setInputsHidden] = useState(false);
   const { precision, ignoreWhitespace, ignoreCase, lang } = options;
@@ -112,14 +113,19 @@ export function App() {
   return (
     <div className="flex h-dvh flex-col">
       <h1 className="sr-only">diff.achraf.tn — compare text instantly</h1>
-      <main ref={mainRef} className="flex min-h-0 flex-1 flex-col px-2.5 pt-2.5 sm:px-4 sm:pt-4" style={{ "--split": split }}>
+      <main ref={mainRef} className="flex min-h-0 flex-1 flex-col px-2.5 pt-2.5 sm:px-4 sm:pt-4">
         {inputsHidden ? (
           <div className="mb-2 flex shrink-0 items-center gap-2">
             <InputsSummary oldLines={engine.diff?.oldLines.length ?? 0} newLines={engine.diff?.newLines.length ?? 0} onShow={() => setInputsHidden(false)} />
             {actions}
           </div>
         ) : null}
-        <div hidden={inputsHidden} className="mb-3 flex h-[calc(var(--split)*100%)] min-h-0 shrink-0 gap-3 max-md:flex-col md:gap-4">
+        <div
+          ref={rowRef}
+          hidden={inputsHidden}
+          className="mb-3 flex min-h-0 shrink-0 gap-3 max-md:flex-col md:gap-4"
+          style={{ height: `${split * 100}%` }}
+        >
           <Editor
             side="original"
             label="Original"
@@ -145,7 +151,7 @@ export function App() {
           options={options}
           narrow={narrow}
           inputsHidden={inputsHidden}
-          splitter={inputsHidden ? null : <Splitter split={split} containerRef={mainRef} onCommit={commitSplit} onCollapse={() => setInputsHidden(true)} />}
+          splitter={inputsHidden ? null : <Splitter split={split} containerRef={mainRef} targetRef={rowRef} onCommit={commitSplit} onCollapse={() => setInputsHidden(true)} />}
           onToggleInputs={() => setInputsHidden((hidden) => !hidden)}
           onExample={loadExample}
         />
