@@ -1,12 +1,12 @@
 /*
  * Carved surfaces (DESIGN.md §5). A surface is one sheet: a body plus up to two tabs that rise out of its
- * top edge, joined by concave fillets. The sheet is painted by a separate, content-free layer so its
- * outline and shadow (filters on the union of the pieces) are rasterised once and never repainted
- * while the content inside scrolls or re-renders.
+ * top edge, joined by concave fillets, painted by a separate, content-free layer.
  *
- * Seams: every piece uses the same opaque fill and overlaps its neighbour by 1px, so anti-aliasing never
- * exposes the page between them. The outline is derived from the union's alpha, so it is continuous
- * across tab, fillet and body at any DPR.
+ * No filters: they made every frame re-run a blur chain in the compositor (≈270ms/frame on weak GPUs).
+ * Instead each body/tab draws a 1px spread ring (+ focus glow) on a ::before at z-index -1. The shape layer
+ * is the stacking context and the pieces are not, so every ring paints beneath every fill: the fills hide
+ * the inner seams and only the union's outer ring stays visible. Fillets draw their own ring inside the
+ * radial-gradient hole. The lift is a box-shadow on the body only, at z-index -2 so it never tints a ring.
  */
 
 @property --edge {
@@ -33,9 +33,6 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  transition:
-    --edge 0.2s ease,
-    --glow 0.2s ease;
 }
 
 .surface:has([data-rim]:focus-visible) {
@@ -48,15 +45,50 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  filter: drop-shadow(1px 0 0 var(--edge)) drop-shadow(-1px 0 0 var(--edge)) drop-shadow(0 1px 0 var(--edge))
-    drop-shadow(0 -1px 0 var(--edge)) drop-shadow(0 0 5px var(--glow)) drop-shadow(0 1px 1.5px var(--lift-near))
-    drop-shadow(0 6px 14px var(--lift-far));
-  will-change: filter;
+  --aa: 0.5px;
+}
+
+@media (min-resolution: 2dppx) {
+  .surface-shape {
+    --aa: 0.25px;
+  }
 }
 
 .surface-shape > i {
   position: absolute;
   background: var(--card);
+}
+
+.surface-shape > i,
+.surface-shape > i::before {
+  transition:
+    --edge 0.2s ease,
+    --glow 0.2s ease;
+}
+
+.shape-body::before,
+.shape-tab::before,
+.shape-body::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: -1;
+  box-shadow:
+    0 0 0 1px var(--edge),
+    0 0 5px 1px var(--glow);
+}
+
+/* Ends where the body starts so the two glows abut instead of doubling up along the outer edge. */
+.shape-tab::before {
+  inset: 0 0 1px;
+}
+
+.shape-body::after {
+  z-index: -2;
+  box-shadow:
+    0 1px 1.5px 1px var(--lift-near),
+    0 6px 14px 1px var(--lift-far);
 }
 
 .shape-body {
@@ -88,12 +120,16 @@
   width: var(--tab-e);
 }
 
-/* Concave fillet: a square filled everywhere except a quarter disc centred on its outer corner. */
+/*
+ * Concave fillet: a square filled everywhere except a quarter disc centred on its outer corner, with the
+ * 1px outline drawn as a ring just inside the disc edge (anti-aliased over one device pixel via --aa).
+ */
 .shape-fillet {
   top: calc(var(--tab-h) - var(--r-fillet));
   width: calc(var(--r-fillet) + 1px);
   height: calc(var(--r-fillet) + 1px);
-  --hole: transparent calc(var(--r-fillet) - 0.5px), var(--card) calc(var(--r-fillet) + 0.5px);
+  --hole: transparent calc(var(--r-fillet) - 1px - var(--aa)), var(--edge) calc(var(--r-fillet) - 1px + var(--aa)),
+    var(--edge) calc(var(--r-fillet) - var(--aa)), var(--card) calc(var(--r-fillet) + var(--aa));
 }
 
 .shape-fillet[data-at="start"] {

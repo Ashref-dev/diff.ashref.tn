@@ -28,7 +28,7 @@ No logo and no header: the brand is a small `diff.achraf.tn` link at the left of
 | `--lift-near` / `--lift-far` | warm 5 % / 4.5 % | black 40 % / 45 % | carved-surface drop shadows |
 
 Radii: cards `rounded-2xl` (16px), controls `rounded-full`, marks 3px. Spacing: Tailwind 4px scale.
-Shadows: carved surfaces use `--lift-*` drop-shadows; `--shadow-card` / `--shadow-float` for small cards and the popover.
+Shadows: carved surfaces use `--lift-*` box-shadows on the body; `--shadow-card` / `--shadow-float` for small cards and the popover.
 
 ## 3. Type
 
@@ -54,11 +54,12 @@ body by **concave fillets** (inverse radius), so the space between tabs reads as
 | OG image | the same tab silhouette as an SVG path |
 
 Rules: tab radius 11px, fillet radius 10px, body radius 16px, tab height 34px. The sheet is painted by a content-free
-layer (`.surface-shape`) whose pieces share one opaque fill and overlap by 1px; the outline is four 1px offset
-drop-shadows on the union, so it is continuous through every fillet at any DPR, and the layer never repaints while
-content scrolls. Fillets are `radial-gradient` quarter-disc holes with a 1px anti-aliasing ramp. Tab widths are
-mirrored into `--tab-s` / `--tab-e` by a ResizeObserver. Keyboard focus inside a surface (`[data-rim]`) turns the whole
-outline orange with a soft glow (registered `@property` colors, 200ms).
+layer (`.surface-shape`) whose pieces share one opaque fill and overlap by 1px. No CSS filters (they cost ~270ms per
+frame on weak GPUs): body and tabs draw a 1px spread ring on a `::before` at z-index -1, beneath every fill, so only the
+union's outer ring shows; fillets are `radial-gradient` quarter-disc holes with the ring drawn inside the hole edge,
+anti-aliased over one device pixel. The lift is a box-shadow on the body only (z-index -2). Tab widths are mirrored into
+`--tab-s` / `--tab-e` by a ResizeObserver. Keyboard focus inside a surface (`[data-rim]`) turns the whole outline orange
+with a soft glow (registered `@property` colors, 200ms, transitioned on the pieces only).
 
 ## 6. Primitives (`src/components/ui.tsx`)
 
