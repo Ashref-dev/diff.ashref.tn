@@ -5,7 +5,10 @@
 Operate-mode tool. Open the page, land on the diff, use it, leave. No hero, no marketing, no sidebar.
 The surface borrows achraf.tn (off-white, Inter, rounded-2xl cards, pill controls) and blank.achraf.tn
 (warm paper, film grain, soft layered shadows, Instrument Serif accents). One accent: orange `#E27100`.
-No logo and no header: the brand is a small `diff.achraf.tn` link at the left of the status bar. Favicons come from achraf.tn.
+No logo and no header: the brand is a small `diff.achraf.tn` link at the left of the status bar.
+Favicon: a rounded tile split into a `--del` rose half with a white minus over an `--add` green half with a white plus,
+the two rows of a unified diff (`public/favicon.svg`; `icon-32.png`, `favicon.ico` and the full-bleed
+`apple-touch-icon.png` are rendered from it).
 
 ## 2. Tokens (`src/index.css`)
 
